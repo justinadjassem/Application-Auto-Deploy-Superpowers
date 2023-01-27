@@ -19,6 +19,36 @@ commands:
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
 
+    install_ansible:
+      description: Install Ansible 
+      steps:
+        - run:
+            name: Install Ansible 
+            command: |
+              sudo apt update
+              sudo apt install software-properties-common -y
+              sudo add-apt-repository --yes --update ppa:ansible/ansible
+              sudo apt install ansible -y
+
+    install_awscli:
+      description: Install AWS CLI v2
+      steps:
+        - run:
+            name: Install AWS CLI v2
+            command: |
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
+              
+    install_nodejs:
+      description: Install Node.js 13
+      steps:
+       - run:
+          name: Install Node.js 13
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs 
+
 
 jobs:
   build-frontend:
@@ -164,6 +194,24 @@ jobs:
 
       - destroy-environment    
 
+  configure-infrastructure:
+    docker: 
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["ff:94:87:a4:95:8c:00:79:1e:83:72:02:4e:44:da:fc"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt 
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
+ 
 
 workflows:
   default:
