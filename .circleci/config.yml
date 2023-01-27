@@ -25,7 +25,6 @@ commands:
         - run:
             name: Install Ansible
             command: |
-              apt install sudo
               sudo apt update
               sudo apt install software-properties-common -y
               sudo add-apt-repository --yes --update ppa:ansible/ansible
@@ -216,7 +215,7 @@ jobs:
 
   configure-infrastructure:
     docker: 
-      - image: cimg/base:stable
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - install_ansible
