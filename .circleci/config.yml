@@ -82,10 +82,10 @@ jobs:
               npm install
               npm audit fix --force --audit-level=critical
               npm audit --audit-level=critical
-      - slack/notify:
-                channel: 03-cloud-devops-eng
-                event: fail
-                template: basic_fail_1
+      # - slack/notify:
+      #           channel: 03-cloud-devops-eng
+      #           event: fail
+      #           template: basic_fail_1
 
   scan-backend:
     docker:
@@ -120,4 +120,4 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-          context: slack-secrets
+          # context: slack-secrets
