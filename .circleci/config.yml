@@ -84,6 +84,22 @@ jobs:
               npm install
               npm run test
 
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: backend security scan
+          command: |
+              cd backend
+              npm install
+              npm audit fix --force --audit-level=critical
+              npm audit fix --force --audit-level=critical
+              npm audit --audit-level=critical
+
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -114,7 +130,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=your-tag \
+              --tags project=udapeople \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"  
       - run:
@@ -122,7 +138,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=your-tag \
+              --tags project=udapeople\
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"  
       - run:
@@ -142,22 +158,6 @@ jobs:
       - destroy-environment    
 
 
-  scan-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [backend-build]
-      - run:
-          name: backend security scan
-          command: |
-              cd backend
-              npm install
-              npm audit fix --force --audit-level=critical
-              npm audit fix --force --audit-level=critical
-              npm audit --audit-level=critical
-
 workflows:
   default:
     jobs:
@@ -176,5 +176,5 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-              only: [test-feature-branch]
+              only: [main]
 

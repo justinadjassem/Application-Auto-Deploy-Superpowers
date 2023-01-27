@@ -29,7 +29,6 @@ Resources:
       SecurityGroups:
         - Ref: InstanceSecurityGroup
       KeyName: prometheus
-      # Ubuntu 18 or higher works fine
       ImageId: ami-00874d747dde814fa
       Tags:
         - Key: Name
