@@ -222,10 +222,10 @@ jobs:
       - install_ansible
 
       - add_ssh_keys:
-          fingerprints: ["ff:94:87:a4:95:8c:00:79:1e:83:72:02:4e:44:da:fc"]
+          fingerprints: [ "61:68:94:d2:f4:bd:e5:4b:9e:83:30:83:f7:ba:5e:20:1e:07:e7:c7" ]
       - attach_workspace:
           at: ~/
-          
+
       - run:
           name: Configure server
           command: |
@@ -299,7 +299,7 @@ jobs:
       - install_ansible
       - install_nodejs
       - add_ssh_keys:
-          fingerprints: ["ff:94:87:a4:95:8c:00:79:1e:83:72:02:4e:44:da:fc"]
+          fingerprints: [ "61:68:94:d2:f4:bd:e5:4b:9e:83:30:83:f7:ba:5e:20:1e:07:e7:c7" ]
       - attach_workspace:
           at: ~/
       - restore_cache:
