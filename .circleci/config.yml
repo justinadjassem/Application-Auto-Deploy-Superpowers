@@ -221,11 +221,9 @@ jobs:
       - install_ansible
 
       - add_ssh_keys:
-          fingerprints: ["b8:eb:6e:48:27:7a:b0:e1:fe:30:55:2a:8d:92:72:d9:6d:3e:03:f8"]
+          fingerprints: ["c1:d3:e9:90:ac:d0:04:08:a3:b4:19:89:96:b8:dc:ca"]
       - attach_workspace:
           at: ~/
-      - restore_cache:
-          keys: [backend-build]
       - run:
           name: Configure server
           command: |
@@ -237,7 +235,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: cimg/base:2023.01
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - install_awscli
@@ -299,7 +297,7 @@ jobs:
       - install_ansible
       - install_nodejs
       - add_ssh_keys:
-          fingerprints: ["b8:eb:6e:48:27:7a:b0:e1:fe:30:55:2a:8d:92:72:d9:6d:3e:03:f8"]
+          fingerprints: ["c1:d3:e9:90:ac:d0:04:08:a3:b4:19:89:96:b8:dc:ca"]
       - attach_workspace:
           at: ~/
       - restore_cache:
