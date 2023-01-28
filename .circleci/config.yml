@@ -175,6 +175,7 @@ jobs:
           - image: amazon/aws-cli
         steps:
           - checkout
+          - install_awscli
 
           - run:
                 name: Install tar utility
@@ -249,6 +250,7 @@ jobs:
                 cd backend
                 npm install
                 npm run migrations > migrations_dump.txt
+
           - run:
                 name: Send migration status to kvdb.io
                 command: |
