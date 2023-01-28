@@ -225,6 +225,7 @@ jobs:
           fingerprints: ["ff:94:87:a4:95:8c:00:79:1e:83:72:02:4e:44:da:fc"]
       - attach_workspace:
           at: ~/
+          
       - run:
           name: Configure server
           command: |
