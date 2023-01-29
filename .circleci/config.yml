@@ -34,6 +34,11 @@ commands:
     install_awscli:
       description: Install AWS CLI v2
       steps:
+        - run:
+            name: Install unzip
+            command: |
+              yum apdate -y
+              yum install -y unzip
         - run: 
             name: Install tar and gzip
             command: |
@@ -181,11 +186,6 @@ jobs:
         steps:
           - checkout
           - install_awscli
-
-          - run:
-                name: Install unzip
-                command: |
-                  yum install unzip
 
           - run:
                 name: Ensure back-end infrastructure exists
