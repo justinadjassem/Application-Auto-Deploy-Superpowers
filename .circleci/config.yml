@@ -37,7 +37,7 @@ commands:
         - run:
             name: Install unzip
             command: |
-              yum apdate -y
+              yum update -y
               yum install -y unzip
         - run: 
             name: Install tar and gzip
