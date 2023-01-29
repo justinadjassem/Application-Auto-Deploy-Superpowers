@@ -247,8 +247,9 @@ jobs:
                 command: |
                   cd backend
                   echo "STARTING MIGRATION"
-                  npm install
+                  sudo npm install -g npm
                   npm run migrations > migrations_dump.txt
+                  cat migrations_dump.txt
 
           - run:
                 name: Send migration status to kvdb.io
