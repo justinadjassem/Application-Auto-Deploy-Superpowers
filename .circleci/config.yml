@@ -183,9 +183,9 @@ jobs:
           - install_awscli
 
           - run:
-                name: Install tar utility
+                name: Install unzip
                 command: |
-                  yum install -y tar gzip
+                  yum install unzip
 
           - run:
                 name: Ensure back-end infrastructure exists
