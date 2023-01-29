@@ -246,6 +246,8 @@ jobs:
           - image: cimg/node:13.8.0
         steps:
           - checkout
+          - install_awscli
+
           - restore_cache:
               keys: [backend-build]
               
