@@ -25,11 +25,11 @@ Resources:
                         OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
                 Enabled: True
                 DefaultRootObject: index.html
-                  DefaultCacheBehavior:
-                      ForwardedValues:
-                          QueryString: False
-                      TargetOriginId: webpage
-                      ViewerProtocolPolicy: allow-all
+                    DefaultCacheBehavior:
+                        ForwardedValues:
+                            QueryString: False
+                        TargetOriginId: webpage
+                        ViewerProtocolPolicy: allow-all
 
 Outputs:
     WorkflowID:
