@@ -297,18 +297,22 @@ jobs:
 
     deploy-backend:
         docker:
-          - image: cimg/node:13.8.0
+          - image: cimg/base:stable
         steps:
           - checkout
           - install_awscli
           - install_ansible
           - install_nodejs
+
           - add_ssh_keys:
                 fingerprints: ["98:b9:d7:af:51:14:ec:ac:3f:ed:0f:1b:0d:7b:27:65"]
+
           - attach_workspace:
                 at: ~/
+                
           - restore_cache:
                 keys: [backend-build]
+
           - run:
                 name: Install dependencies
                 command: |
@@ -317,19 +321,30 @@ jobs:
                 name: Deploy backend
                 command: |
                   cd backend
-                  npm install
-                  npm run build
+
+                  touch .env
+                  echo ENVIRONMENT=production > ".env"
+                  echo TYPEORM_CONNECTION=postgres >> ".env"
+                  echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
+                  echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> ".env"
+                  echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
+                  echo NODE_ENV=production >> ".env"
+                  echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
+                  echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
+                  echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
+                  echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
+                  echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
+
+
+                  sudo npm install
+                  sudo npm run build
                   
                   cd ..
                   tar -C backend -czvf artifact.tar.gz .
                   mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
                   mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
                   cd .circleci/ansible
-                  
-                  export TYPEORM_MIGRATIONS_DIR=./migrations
-                  export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-                  export TYPEORM_MIGRATIONS=./migrations/*.ts
-                  
+                                    
                   echo "Contents  of the inventory.txt file is -------"
                   cat inventory.txt
                   ansible-playbook -i inventory.txt deploy-backend.yml
