@@ -1,19 +1,24 @@
+- name: install pm2
+  become: true
+  npm:
+    name: pm2
+    global: yes
 
 - name: Create Backend Directory
   file:
-    path: /home/ubuntu/backend
-    state: directory
+      path: /home/ubuntu/backend
+      state: directory
 
 - name: Extract artifact.tar.gz to EC2 
   unarchive:
-    src: artifact.tar.gz
-    dest: /home/ubuntu/backend
+      src: files/artifact.tar.gz
+      dest: /home/ubuntu/backend
 
 - name: "Installing Node Dependencies"
   shell: |
     cd /home/ubuntu/backend
     sudo npm i
-    
+
 - name: Start the app
   become: true
   shell: |
