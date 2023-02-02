@@ -323,6 +323,7 @@ jobs:
                   cd backend
 
                   touch .env
+                  
                   echo ENVIRONMENT=production > ".env"
                   echo TYPEORM_CONNECTION=postgres >> ".env"
                   echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
@@ -372,7 +373,7 @@ jobs:
                   export API_URL=http://${BACKEND_PUBLIC_IP}:3030
                   echo ${API_URL}
 
-                  if curl $API_URL/api/status | grep "ok"
+                  if curl ${API_URL}/api/status | grep "ok"
                   then
                     exit 0
                   else
