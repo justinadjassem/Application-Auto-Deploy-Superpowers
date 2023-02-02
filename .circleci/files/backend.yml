@@ -28,7 +28,7 @@ Resources:
         Properties:
             InstanceType: t2.micro
             SecurityGroups:
-              - Ref: InstanceSecurityGroup
+              - !Ref InstanceSecurityGroup
             KeyName: alx
             ImageId: ami-00874d747dde814fa
             Tags:
