@@ -12,10 +12,11 @@
 - name: "Installing Node Dependencies"
   shell: |
     cd /home/ubuntu/backend
-    npm i
+    sudo npm i
+    
 - name: Start the app
   become: true
   shell: |
     cd /home/ubuntu/backend/dist
     pm2 stop default
-    pm2 start -f main.js 
+    pm2 start npm -- start
