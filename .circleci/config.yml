@@ -295,62 +295,101 @@ jobs:
           - destroy-environment
           - revert-migrations   
 
+    # deploy-backend:
+    #     docker:
+    #       - image: python:3.7-alpine3.16
+    #     steps:
+    #       - checkout
+    #       - install_awscli
+    #       - install_ansible
+    #       - install_nodejs
+
+    #       - add_ssh_keys:
+    #             fingerprints: ["98:b9:d7:af:51:14:ec:ac:3f:ed:0f:1b:0d:7b:27:65"]
+
+    #       - attach_workspace:
+    #             at: ~/
+                
+    #       - restore_cache:
+    #             keys: [backend-build]
+
+    #       - run:
+    #             name: Install dependencies
+    #             command: |
+    #               sudo apt -y install tar gzip curl
+    #       - run:
+    #             name: Deploy backend
+    #             command: |
+    #               cd backend
+
+    #               touch .env
+
+    #               echo ENVIRONMENT=production > ".env"
+    #               echo TYPEORM_CONNECTION=postgres >> ".env"
+    #               echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
+    #               echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> ".env"
+    #               echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
+    #               echo NODE_ENV=production >> ".env"
+    #               echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
+    #               echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
+    #               echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
+    #               echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
+    #               echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
+
+
+    #               sudo npm install
+    #               sudo npm run build
+                  
+    #               cd ..
+    #               tar -C backend -czvf artifact.tar.gz .
+    #               mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+    #               mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+    #               cd .circleci/ansible
+                                    
+    #               echo "Contents  of the inventory.txt file is -------"
+    #               cat inventory.txt
+    #               ansible-playbook -i inventory.txt deploy-backend.yml
+    #       - destroy-environment
+    #       - revert-migrations
+
+
+
+
+
+
     deploy-backend:
         docker:
-          - image: cimg/base:stable
+          - image: python:3.7-alpine3.16
         steps:
           - checkout
-          - install_awscli
-          - install_ansible
-          - install_nodejs
-
           - add_ssh_keys:
-                fingerprints: ["98:b9:d7:af:51:14:ec:ac:3f:ed:0f:1b:0d:7b:27:65"]
-
+                fingerprints:
+                  - "998:b9:d7:af:51:14:ec:ac:3f:ed:0f:1b:0d:7b:27:65"
+                # Add ssh keys with fingerprint
           - attach_workspace:
                 at: ~/
-                
-          - restore_cache:
-                keys: [backend-build]
-
           - run:
                 name: Install dependencies
                 command: |
-                  sudo apt -y install tar gzip curl
+                  apk add --update --no-cache tar gzip nodejs npm ansible aws-cli
           - run:
                 name: Deploy backend
                 command: |
                   cd backend
-
-                  touch .env
-                  
-                  echo ENVIRONMENT=production > ".env"
-                  echo TYPEORM_CONNECTION=postgres >> ".env"
-                  echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
-                  echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> ".env"
-                  echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
-                  echo NODE_ENV=production >> ".env"
-                  echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
-                  echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
-                  echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
-                  echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
-                  echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-
-
-                  sudo npm install
-                  sudo npm run build
-                  
+                  npm i
+                  npm run build
                   cd ..
                   tar -C backend -czvf artifact.tar.gz .
-                  mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+                  mkdir -p ~/project/.circleci/ansible/roles/deploy/files
                   mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
                   cd .circleci/ansible
-                                    
                   echo "Contents  of the inventory.txt file is -------"
                   cat inventory.txt
                   ansible-playbook -i inventory.txt deploy-backend.yml
-          - destroy-environment
-          - revert-migrations
+          - destroy-environment:
+                workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          - revert-migrations:
+                workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
     smoke-test:
         docker:
@@ -370,10 +409,13 @@ jobs:
                     --query 'Reservations[*].Instances[*].PublicIpAddress' \
                     --output text)
 
+                  echo ${BACKEND_PUBLIC_IP}
+
                   export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+
                   echo ${API_URL}
 
-                  if curl ${API_URL}/api/status | grep "ok"
+                  if curl -s ${API_URL}/api/status | grep "ok"
                   then
                     exit 0
                   else
