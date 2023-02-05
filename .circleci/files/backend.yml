@@ -13,8 +13,6 @@ Resources:
             GroupName: !Sub UdaPeople-${ID}
             GroupDescription: Allow port 22 and port 3030.
             SecurityGroupIngress:
-              - IpProtocol: "-1"
-                CidrIp: 0.0.0.0/0
               - IpProtocol: tcp
                 FromPort: 22
                 ToPort: 22
@@ -29,7 +27,7 @@ Resources:
             InstanceType: t2.micro
             SecurityGroups:
               - !Ref InstanceSecurityGroup
-            KeyName: alx
+            KeyName: udakey
             ImageId: ami-00874d747dde814fa
             Tags:
               - Key: Name
