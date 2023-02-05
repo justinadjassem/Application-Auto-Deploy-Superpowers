@@ -83,7 +83,7 @@ jobs:
 
     build-frontend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -100,7 +100,7 @@ jobs:
 
     build-backend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -117,7 +117,7 @@ jobs:
 
     test-frontend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -131,7 +131,7 @@ jobs:
                   
     test-backend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -145,7 +145,7 @@ jobs:
 
     scan-frontend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -157,12 +157,13 @@ jobs:
                     npm install
                     npm audit fix --force --audit-level=critical
                     npm audit fix --force --audit-level=critical
+                    npm audit fix --force --audit-level=critical
                     npm audit --audit-level=critical
           - notify_on_failure
 
     scan-backend:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - restore_cache:
@@ -172,7 +173,8 @@ jobs:
                 command: |
                     cd backend
                     npm install
-                    npm audit fix --audit-level=critical --force
+                    npm audit fix --force --audit-level=critical
+                    npm audit fix --force --audit-level=critical
 
     deploy-infrastructure:
         docker: 
@@ -239,7 +241,7 @@ jobs:
 
     run-migrations:
         docker:
-          - image: cimg/node:18.13.0
+          - image: cimg/node:13.8.0
         steps:
           - checkout
           - install_awscli
