@@ -248,12 +248,10 @@ jobs:
 
     run-migrations:
         docker:
-          - image: cimg/node:13.8.0
+          - image: circleci/node:13.8.0
         steps:
           - checkout
           - install_awscli
-          - restore_cache:
-              keys: [backend-build]
 
           - run:
                 name: Run migrations
@@ -261,7 +259,7 @@ jobs:
                   cd backend
                   sudo npm install
                   echo "STARTING MIGRATION"
-                  npm run migrations > migrations_dump.txt
+                  sudo npm run migrations > migrations_dump.txt
                   cat migrations_dump.txt
 
           - run:
@@ -365,8 +363,8 @@ jobs:
                   pwd
                   ls -al
 
-                  sudo npm i
-                  sudo npm run build
+                  npm i
+                  npm run build
                   cd ..
 
                   pwd
