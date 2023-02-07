@@ -257,9 +257,9 @@ jobs:
                 name: Run migrations
                 command: |
                   cd backend
-                  sudo npm install
+                  npm install
                   echo "STARTING MIGRATION"
-                  sudo npm run migrations > migrations_dump.txt
+                  npm run migrations > migrations_dump.txt
                   cat migrations_dump.txt
 
           - run:
