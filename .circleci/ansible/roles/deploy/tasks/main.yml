@@ -1,24 +1,24 @@
 ---
-- name: install pm2
+- name: "Install dependencies [nodejs & npm]"
+  become: true
+  apt:
+    name: ["nodejs","npm"]
+    state: latest
+    update_cache: yes
+
+- name: "Install pm2"
   become: true
   npm:
     name: pm2
     global: yes
+    production: yes
+    state: present
 
-- name: Create Backend Directory
-  file:
-      path: /home/ubuntu/backend
-      state: directory
-
-- name: Extract artifact.tar.gz to EC2 
-  unarchive:
-      src: artifact.tar.gz
-      dest: /home/ubuntu/backend
-
-- name: "Installing Node Dependencies"
+- name: Configure pm2 to start as service
+  become: true
   shell: |
-    cd /home/ubuntu/backend
-    sudo npm i
+    sudo su -c "env PATH=$PATH:usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
+    pm2 save
 
 - name: Start the app
   become: true
@@ -28,12 +28,27 @@
     pm2 start npm -- start main.js
   register: execute_node
 
+- name: "Remove stale dependencies"
+  become: true
+  apt:
+    autoremove: yes
+
+- name: Create Backend Directory
+  file:
+    path: /home/ubuntu/backend
+    state: directory
+
+- name: Extract artifact.tar.gz to EC2 
+  unarchive:
+    src: artifact.tar.gz
+    dest: /home/ubuntu/backend
+
+- name: "Installing Node Dependencies"
+  shell: |
+    cd /home/ubuntu/backend
+    sudo npm i
+
 - name: Print message
   debug:
       msg: "{{ execute_node.stdout_lines }}"
 
-- name: Configure pm2 to start as service
-  become: true
-  shell: |
-    sudo su -c "env PATH=$PATH:usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
-    pm2 save
