@@ -451,7 +451,10 @@ jobs:
                   list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
                   --no-paginate --output text)
 
-                  echo "OldWokflowID: ${OLD_WORKFLOW_ID}"
+                  echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
+                  cat ~/OLD_WORKFLOW_ID.txt
+
+                  echo OldWokflowID: ${OLD_WORKFLOW_ID}
 
                   curl https://kvdb.io/${KVDB_BUCKET}/old_workflow_id -d "${OLD_WORKFLOW_ID}"
 
@@ -469,9 +472,36 @@ jobs:
 
                   echo Current workflow Id : "${CIRCLE_WORKFLOW_ID:0:7}"
 
-          # Here's where you will add some code to rollback on failure
           - destroy-environment
-          - revert-migrations 
+          - revert-migrations
+
+    cleanup:
+        docker:
+          - image: cimg/node:13.8.0
+        steps:
+          - checkout
+          - install_awscli
+          - run:
+                name: Get old stack workflow id
+                command: |
+                  export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+                  --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+                  echo Stack names: "${STACKS[@]}"
+                  export OLD_WORKFLOW_ID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/old_workflowid)
+
+                  echo Old Workflow ID: "${OLD_WORKFLOW_ID}"          
+          - run:
+                name: Remove old stacks and files
+                command: |
+                  if [[ "${STACKS[@]}" =~ "${OLD_WORKFLOW_ID}" ]]
+                  then
+                    echo "-------------Cleaning up old resources-------------"
+                    aws s3 rm "s3://udapeople-${OLD_WORKFLOW_ID}" --recursive
+                    aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}"
+                    aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}"
+                  else
+                    echo "-------------Nothing to Cleanup-------------"
+                  fi
 
 # notify_on_success:
 #     docker:
@@ -514,4 +544,6 @@ workflows:
               requires: [deploy-backend, deploy-frontend]
           - cloudfront-update:
                 requires: [smoke-test]
+          - cleanup:
+                requires: [cloudfront-update]
 
