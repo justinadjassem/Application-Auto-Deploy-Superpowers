@@ -461,14 +461,20 @@ jobs:
               name: Update cloudfront distribution 
               no_output_timeout: 30m
               command: |
+                export OLD_WORKFLOW_ID=$(aws cloudformation \
+                list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                --no-paginate --output text)
+
+                echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
+                cat ~/OLD_WORKFLOW_ID.txt
+
                 aws cloudformation deploy \
                 --template-file .circleci/files/cloudfront.yml \
-                --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-                --stack-name InitialStack \
+                --stack-name InitialStack-${OLD_WORKFLOW_ID} \
+                --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --tags project=udapeople
 
                 echo Old Wokflow ID: "${OLD_WORKFLOW_ID}"
-
                 echo Current workflow Id : "${CIRCLE_WORKFLOW_ID:0:7}"
 
           - destroy-environment
@@ -490,6 +496,17 @@ jobs:
                 name: Get old stack workflow id & Remove old stacks and files
                 command: |
                   # Fetch the Old workflow ID
+
+                  export OLD_WORKFLOW_ID=$(aws cloudformation \
+                  list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                  --no-paginate --output text)
+                  echo OldWorkflowID: "${OLD_WORKFLOW_ID"
+                  echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+                  # Fetch the stack names          
+                  export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+                  --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+                  echo Stack names: "${STACKS[@]}"          
+
                   cat ~/OLD_WORKFLOW_ID.txt
                   OLD_WORKFLOW_ID=$(cat ~/OLD_WORKFLOW_ID.txt)
                   echo OldWorkflowID: "${OLD_WORKFLOW_ID}"
