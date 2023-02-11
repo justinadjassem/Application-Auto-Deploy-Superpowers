@@ -485,8 +485,7 @@ jobs:
           - image: amazon/aws-cli
         steps:
           - checkout
-          - attach_workspace:
-              at: ~/
+          - install_nodejs
                 
           - run:
                 name: Get old stack workflow id & Remove old stacks and files
