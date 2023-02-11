@@ -482,7 +482,7 @@ jobs:
 
     cleanup:
         docker:
-          - image: amazon/aws_cli
+          - image: amazon/aws-cli
         steps:
           - checkout
           - attach_workspace:
