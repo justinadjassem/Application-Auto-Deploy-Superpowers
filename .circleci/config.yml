@@ -482,16 +482,13 @@ jobs:
 
     cleanup:
         docker:
-          - image: python:3.10.5-alpine3.16
+          - image: amazon/aws_cli
         steps:
           - checkout
+          - install_awscli
           - attach_workspace:
               at: ~/
-          - run:
-              name: Install dependencies
-              command: |
-                apk add --update --no-cache tar gzip nodejs npm aws-cli curl ansible
-
+                
           - run:
                 name: Get old stack workflow id & Remove old stacks and files
                 command: |
