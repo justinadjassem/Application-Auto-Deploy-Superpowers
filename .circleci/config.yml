@@ -485,7 +485,6 @@ jobs:
           - image: amazon/aws_cli
         steps:
           - checkout
-          - install_awscli
           - attach_workspace:
               at: ~/
                 
