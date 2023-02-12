@@ -491,7 +491,7 @@ jobs:
                 name: Install dependencies
                 command: |
                   yum install tar gzip curl -y
-                  
+
           - attach_workspace:
                 at: ~/
 
@@ -522,7 +522,7 @@ jobs:
                   if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OLD_WORKFLOW_ID}" ]]
                   then
                     echo "s3://${OLD_WORKFLOW_ID}" 
-                    aws s3 rm --recursive "s3://${OLD_WORKFLOW_ID}" || true
+                    aws s3 rb --force s3://${OLD_WORKFLOW_ID}
                     aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}" || true
                     aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}" || true
                     echo "=======================Delete Confirmed========================"
