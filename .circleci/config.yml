@@ -484,14 +484,18 @@ jobs:
 
     cleanup:
         docker:
-          - image: cimg/node:13.8.0
+          - image: amazon/aws-cli
         steps:
           - checkout
-          - install_awscli
-          - install_nodejs
+
           - attach_workspace:
                 at: ~/
-                
+
+          - run:
+                name: Install dependencies
+                command: |
+                  yum install tar gzip curl -y
+
           - run:
                 name: Get old stack workflow id & Remove old stacks and files
                 command: |
@@ -518,9 +522,10 @@ jobs:
                   
                   if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OLD_WORKFLOW_ID}" ]]
                   then
-                    aws s3 rm --recursive "s3://${OLD_WORKFLOW_ID}" 
-                    aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}"
-                    aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}"
+                    echo "s3://${OLD_WORKFLOW_ID}" 
+                    aws s3 rm --recursive "s3://${OLD_WORKFLOW_ID}" || true
+                    aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}" || true
+                    aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}" || true
                     echo "=======================Delete Confirmed========================"
                   else
                     echo "-------------Nothing to Cleanup-------------"
