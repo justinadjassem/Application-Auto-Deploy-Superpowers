@@ -529,6 +529,7 @@ jobs:
                   else
                     echo "-------------Nothing to Cleanup-------------"
                   fi
+
 # notify_on_success:
 #     docker:
 #       - image: cimg/base:stable
@@ -537,7 +538,6 @@ jobs:
 #             event: pass
 #             channel: 03-cloud-devops-eng
 #             template: success_tagged_deployment_1  
-
 
 workflows:
     default:
