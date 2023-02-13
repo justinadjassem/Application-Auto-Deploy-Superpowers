@@ -344,7 +344,6 @@ jobs:
           - run:
                 name: Deploy Backend
                 command: |
-
                   pwd
                   cd backend
                   touch .env
@@ -385,7 +384,6 @@ jobs:
         docker:
           - image: python:3.10-alpine3.16
         steps:
-          # Checkout code from git
           - checkout
   
           - run:
