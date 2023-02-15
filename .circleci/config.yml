@@ -29,55 +29,53 @@ commands:
                   aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
 
     install_ansible:
-      description: Install Ansible
-      steps:
-        - run:
-            name: Install Ansible
-            command: |
-              sudo apt update
-              sudo apt install software-properties-common -y
-              sudo add-apt-repository --yes --update ppa:ansible/ansible
-              sudo apt install ansible -y
+        description: Install Ansible
+        steps:
+          - run:
+                name: Install Ansible
+                command: |
+                  sudo apt update
+                  sudo apt install software-properties-common -y
+                  sudo add-apt-repository --yes --update ppa:ansible/ansible
+                  sudo apt install ansible -y
 
     install_awscli:
-      description: Install AWS CLI v2
-      steps:
-
-        - run:
-            name: Install AWS CLI v2
-            command: |
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install
+        description: Install AWS CLI v2
+        steps:
+          - run:
+                name: Install AWS CLI v2
+                command: |
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  unzip awscliv2.zip
+                  sudo ./aws/install
 
     install_nodejs:
       description: Install Node.js 13
       steps:
        - run:
-          name: Install Node.js 13
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-            sudo apt install -y nodejs 
+            name: Install Node.js 13
+            command: |
+              curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+              sudo apt install -y nodejs 
 
     revert-migrations:
-          description: Revert the last migration if successfully run in the current workflow.
-          parameters:
+        description: Revert the last migration if successfully run in the current workflow.
+        parameters:
             Workflow_ID:
-              type: string 
-              default: "${CIRCLE_WORKFLOW_ID:0:7}"
-          steps:
+                type: string 
+                default: "${CIRCLE_WORKFLOW_ID:0:7}"
+        steps:
           - run:
-              name: Revert migrations
-              when: on_fail
-              command: |
-                SUCCESS=$(curl --insecure http://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
-                if(( $SUCCESS==1 )); 
-                then
-                  cd ~/project/backend
-                  npm install
-                  npm run migration:revert
-                fi
-
+                name: Revert migrations
+                when: on_fail
+                command: |
+                  SUCCESS=$(curl --insecure http://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
+                  if(( $SUCCESS == 1 )); 
+                  then
+                    cd ~/project/backend
+                    npm install
+                    npm run migration:revert
+                  fi
 
 jobs:
 
@@ -424,100 +422,100 @@ jobs:
 
                   if curl -s ${URL} | grep "Welcome"
                   then
-                    exit 0
+                    exit 1
                   else
                     exit 1
                   fi                  
           - destroy-environment
           - revert-migrations  
 
-    cloudfront-update:
-        docker:
-          - image: python:3.10.5-alpine3.16
-        steps:
-          - checkout
-          - attach_workspace:
-                at: ~/
-          - run:
-              name: Install dependencies
-              command: |
-                apk add --update --no-cache nodejs npm aws-cli curl
+    # cloudfront-update:
+    #     docker:
+    #       - image: python:3.10.5-alpine3.16
+    #     steps:
+    #       - checkout
+    #       - attach_workspace:
+    #             at: ~/
+    #       - run:
+    #           name: Install dependencies
+    #           command: |
+    #             apk add --update --no-cache nodejs npm aws-cli curl
 
-          - run:
-              name: OLD_WORKFLOW_ID kvdb.io
-              command: |
-                export OLD_WORKFLOW_ID=$(aws cloudformation \
-                list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                --no-paginate --output text)
+    #       - run:
+    #           name: OLD_WORKFLOW_ID kvdb.io
+    #           command: |
+    #             export OLD_WORKFLOW_ID=$(aws cloudformation \
+    #             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+    #             --no-paginate --output text)
 
-                echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
-                cat ~/OLD_WORKFLOW_ID.txt
+    #             echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
+    #             cat ~/OLD_WORKFLOW_ID.txt
 
-                echo OldWokflowID: ${OLD_WORKFLOW_ID}
+    #             echo OldWokflowID: ${OLD_WORKFLOW_ID}
 
-                curl https://kvdb.io/${KVDB_BUCKET}/old_workflow_id -d "${OLD_WORKFLOW_ID}"
+    #             curl https://kvdb.io/${KVDB_BUCKET}/old_workflow_id -d "${OLD_WORKFLOW_ID}"
 
-          - run: 
-              name: Update cloudfront distribution 
-              no_output_timeout: 30m
-              command: |
-                export OLD_WORKFLOW_ID=$(aws cloudformation \
-                list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                --no-paginate --output text)
+    #       - run: 
+    #           name: Update cloudfront distribution 
+    #           no_output_timeout: 30m
+    #           command: |
+    #             export OLD_WORKFLOW_ID=$(aws cloudformation \
+    #             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+    #             --no-paginate --output text)
 
-                echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
-                cat ~/OLD_WORKFLOW_ID.txt
+    #             echo ${OLD_WORKFLOW_ID} >> ~/OLD_WORKFLOW_ID.txt
+    #             cat ~/OLD_WORKFLOW_ID.txt
 
-                aws cloudformation deploy \
-                --template-file .circleci/files/cloudfront.yml \
-                --stack-name InitialStack \
-                --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-                --tags project=udapeople
+    #             aws cloudformation deploy \
+    #             --template-file .circleci/files/cloudfront.yml \
+    #             --stack-name InitialStack \
+    #             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+    #             --tags project=udapeople
 
-                echo Old Wokflow ID: "${OLD_WORKFLOW_ID}"
-                echo Current workflow Id : "${CIRCLE_WORKFLOW_ID:0:7}"
+    #             echo Old Wokflow ID: "${OLD_WORKFLOW_ID}"
+    #             echo Current workflow Id : "${CIRCLE_WORKFLOW_ID:0:7}"
 
-          - destroy-environment
-          - revert-migrations
+    #       - destroy-environment
+    #       - revert-migrations
 
-    cleanup:
-        docker:
-          - image: amazon/aws-cli
-        steps:
-          - checkout
-          - run:
-                name: Install dependencies
-                command: |
-                  yum install tar gzip curl -y
+    # cleanup:
+    #     docker:
+    #       - image: amazon/aws-cli
+    #     steps:
+    #       - checkout
+    #       - run:
+    #             name: Install dependencies
+    #             command: |
+    #               yum install tar gzip curl -y
 
-          - attach_workspace:
-                at: ~/
+    #       - attach_workspace:
+    #             at: ~/
 
-          - run:
-                name: Get old stack workflow id & Remove old stacks and files
-                command: |
-                  # Fetch the stack names          
-                  export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
-                          --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-
-
-                  export OLD_WORKFLOW_ID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/old_workflow_id)
-                  echo Old Workflow ID: $OLD_WORKFLOW_ID
+    #       - run:
+    #             name: Get old stack workflow id & Remove old stacks and files
+    #             command: |
+    #               # Fetch the stack names          
+    #               export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+    #                       --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
 
 
-                  echo Stack names: "${STACKS[@]}"          
-                  echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+    #               export OLD_WORKFLOW_ID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/old_workflow_id)
+    #               echo Old Workflow ID: $OLD_WORKFLOW_ID
+
+
+    #               echo Stack names: "${STACKS[@]}"          
+    #               echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
                   
-                  if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OLD_WORKFLOW_ID}" ]]
-                  then
-                    echo "s3://${OLD_WORKFLOW_ID}" 
-                    aws s3 rb --force s3://${OLD_WORKFLOW_ID}
-                    aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}" || true
-                    aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}" || true
-                    echo "=======================Delete Confirmed========================"
-                  else
-                    echo "-------------Nothing to Cleanup-------------"
-                  fi
+    #               if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OLD_WORKFLOW_ID}" ]]
+    #               then
+    #                 echo "s3://${OLD_WORKFLOW_ID}" 
+    #                 aws s3 rb --force s3://${OLD_WORKFLOW_ID}
+    #                 aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}" || true
+    #                 aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}" || true
+    #                 echo "=======================Delete Confirmed========================"
+    #               else
+    #                 echo "-------------Nothing to Cleanup-------------"
+    #               fi
 # notify_on_success:
 #     docker:
 #       - image: cimg/base:stable
@@ -556,8 +554,8 @@ workflows:
                 requires: [run-migrations]
           - smoke-test:
               requires: [deploy-backend, deploy-frontend]
-          - cloudfront-update:
-                requires: [smoke-test]
-          - cleanup:
-                requires: [cloudfront-update]
+          # - cloudfront-update:
+          #       requires: [smoke-test]
+          # - cleanup:
+          #       requires: [cloudfront-update]
 
