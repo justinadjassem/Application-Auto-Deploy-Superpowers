@@ -71,7 +71,7 @@ commands:
                   SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
 
                   echo "value of SUCCESS : ${SUCCESS}"
-                  
+
                   # Logic for reverting the database state
                   if [[ "$SUCCESS" -eq 1 ]];
                   then
@@ -425,7 +425,7 @@ jobs:
 
                   if curl -s ${URL} | grep "Welcome"
                   then
-                    exit 1
+                    exit 0
                   else
                     exit 1
                   fi                  
