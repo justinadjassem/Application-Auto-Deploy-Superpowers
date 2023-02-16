@@ -69,7 +69,7 @@ commands:
                 when: on_fail
                 command: |
                   SUCCESS=$(curl --insecure  https://kvdb.io/39exoJR7DUoEGgxKQtN9Za/migration_<< parameters.Workflow_ID >>)
-                  echo "value of SUCCESS : ${$SUCCESS}"
+                  echo "value of SUCCESS : ${SUCCESS}"
                   # Logic for reverting the database state
                   if [[ "$SUCCESS" -eq 1 ]];
                   then
